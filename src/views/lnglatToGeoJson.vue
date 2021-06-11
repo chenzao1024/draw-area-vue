@@ -1,14 +1,12 @@
 <template>
   <div class="width-100">
-    <div
-      class="view-container flex-column p-20"
-      style="width: 50%; max-width: 600px"
-    >
+    <div class="view-container flex-column p-20">
       <div class="flex align-center p-10">
+        <div>经纬度转 GeoJson：</div>
         <input
           type="text"
           v-model="title"
-          class="name mr-20"
+          class="name mx-20"
           placeholder="请输入区域名称"
         />
         <input
@@ -17,8 +15,6 @@
           class="name mr-20"
           placeholder="请输入区域中心点经纬度"
         />
-      </div>
-      <div class="flex align-center p-10">
         <input
           type="text"
           v-model="lnglats"
@@ -32,6 +28,25 @@
           @click="onCreateGeoJson"
         />
       </div>
+      <div class="flex align-center p-10">
+        <div>GeoJson 转经纬度：</div>
+        <div class="flex align-center p-10 upload-parent">
+          <a-upload
+            :file-list="fileList"
+            :remove="handleRemove"
+            :before-upload="beforeUpload"
+            :multiple="true"
+          >
+            <a-button> <a-icon type="upload" /> 选择GeoJson文件 </a-button>
+          </a-upload>
+        </div>
+        <input
+          type="button"
+          class="button"
+          value="确定生成"
+          @click="onCreateLngLatJson"
+        />
+      </div>
     </div>
   </div>
 </template>
@@ -43,16 +58,80 @@ export default {
       title: "",
       center: "",
       lnglats: "",
+      fileList: [],
+      lngLatResultList: [],
     };
   },
   methods: {
+    handleRemove(file) {
+      const index = this.fileList.indexOf(file);
+      const newFileList = this.fileList.slice();
+      newFileList.splice(index, 1);
+      this.fileList = newFileList;
+    },
+    beforeUpload(file) {
+      this.fileList = [...this.fileList, file];
+      let reader = new FileReader();
+      reader.readAsText(file);
+      reader.onload = (e) => {
+        let areaGeoJson = JSON.parse(e.target.result);
+        this.lngLatResultList.push(
+          this._getLocationParamByGeoJson(areaGeoJson)
+        );
+      };
+      return false;
+    },
+    onCreateLngLatJson() {
+      this.lngLatResultList.forEach((result) => {
+        this._downLoadFile(result, result.name, "json");
+      });
+    },
+    _getLocationParamByGeoJson(areaGeoJson) {
+      let name = areaGeoJson.name;
+      let center = areaGeoJson.center;
+      let tempLngLatListList = [];
+      console.log(areaGeoJson.features[0]);
+      if (areaGeoJson.features[0].geometry.coordinates.length > 0) {
+        areaGeoJson.features[0].geometry.coordinates[0].forEach(
+          (locationList) => {
+            let tempLngLatList = [];
+            locationList.forEach((location) => {
+              let lnglat = location.join(",");
+              tempLngLatList.push(lnglat);
+            });
+            let lnglatStr = tempLngLatList.join(";");
+            tempLngLatListList.push(lnglatStr);
+          }
+        );
+        let lnglatStrStr = tempLngLatListList.join("#");
+        return {
+          name,
+          center,
+          lnglatStrStr,
+        };
+      } else {
+        return {
+          name: "geoJson格式错误",
+          center: "geoJson格式错误",
+          lnglatStrStr: "geoJson格式错误",
+        };
+      }
+    },
     onCreateGeoJson() {
       if (!this._checkParams()) return;
-      let locationList = [];
-      let tempLocationList = this.lnglats.split(";");
-      tempLocationList.forEach((lnglatStr) => {
-        let tempLocation = lnglatStr.split(",");
-        locationList.push(tempLocation);
+      let tempLocationListList = this.lnglats.split("#");
+      let locationListList = [];
+      tempLocationListList.forEach((lnglatStr) => {
+        let locationList = [];
+        let tempLocationList = lnglatStr.split(";");
+        tempLocationList.forEach((lnglat) => {
+          let tempLocation = lnglat.split(",");
+          locationList.push([
+            parseFloat(tempLocation[0]),
+            parseFloat(tempLocation[1]),
+          ]);
+        });
+        locationListList.push(locationList);
       });
 
       let geoJson = {
@@ -72,14 +151,14 @@ export default {
             },
             geometry: {
               type: "MultiPolygon",
-              coordinates: [[locationList]],
+              coordinates: [locationListList],
             },
           },
         ],
       };
-      this._downLoadFile(geoJson);
+      this._downLoadFile(geoJson, this.title, "geojson");
     },
-    _downLoadFile(geojsonResult) {
+    _downLoadFile(geojsonResult, name, type) {
       // 处理数据为 geojson
       let data = new Blob([JSON.stringify(geojsonResult)], {
         type: "text/plain;charset=UTF-8",
@@ -87,7 +166,7 @@ export default {
       let downloadUrl = window.URL.createObjectURL(data);
       let anchor = document.createElement("a");
       anchor.href = downloadUrl;
-      anchor.download = this.title + ".geojson";
+      anchor.download = `${name}.${type}`;
       anchor.click();
       window.URL.revokeObjectURL(data);
     },

@@ -121,7 +121,7 @@ export default {
         zIndex: 99,
         resizeEnable: true,
         zoom: 10,
-        zooms: [11, 18],
+        zooms: [6, 20],
       });
     },
     // 根据输入情况修改地图中心点位置
