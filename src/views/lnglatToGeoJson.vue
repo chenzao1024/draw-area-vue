@@ -75,6 +75,8 @@ export default {
       reader.readAsText(file);
       reader.onload = (e) => {
         let areaGeoJson = JSON.parse(e.target.result);
+        // console.log(areaGeoJson)
+        // this._test(areaGeoJson)
         this.lngLatResultList.push(
           this._getLocationParamByGeoJson(areaGeoJson)
         );
@@ -82,8 +84,46 @@ export default {
       return false;
     },
     onCreateLngLatJson() {
-      this.lngLatResultList.forEach((result) => {
-        this._downLoadFile(result, result.name, "json");
+      // console.log(this.lngLatResultList);
+      this.lngLatResultList.forEach((result, index) => {
+        setTimeout(
+          () => {
+            this._downLoadFile(result, result.name, "json");
+          },
+          index * 1000,
+          index
+        );
+      });
+    },
+    _test(dataList) {
+      let fileList = [];
+      dataList.forEach((item) => {
+        let geoJson = {
+          type: "FeatureCollection",
+          name: item.name,
+          crs: {
+            type: "name",
+            properties: { name: "urn:ogc:def:crs:OGC:1.3:CRS84" },
+          },
+          center: item.center,
+          features: [
+            {
+              type: "Feature",
+              properties: {
+                id: this._randomNum(1, 10000),
+                name: item.name,
+              },
+              geometry: {
+                type: "MultiPolygon",
+                coordinates: [item.locationList],
+              },
+            },
+          ],
+        };
+        fileList.push(geoJson);
+      });
+      fileList.forEach((item) => {
+        this._downLoadFile(item, item.name, "geojson");
       });
     },
     _getLocationParamByGeoJson(areaGeoJson) {

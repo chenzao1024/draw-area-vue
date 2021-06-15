@@ -362,32 +362,61 @@ export default {
         return;
       }
 
-      this.outputList.forEach((areaInfo) => {
+      this.outputList.forEach((areaInfo, index) => {
         // 处理数据为 geojson
-        let geojsonResult = this._changeResultToGeoJson(areaInfo);
-        let data = new Blob([JSON.stringify(geojsonResult)], {
-          type: "text/plain;charset=UTF-8",
-        });
-        let downloadUrl = window.URL.createObjectURL(data);
-        let anchor = document.createElement("a");
-        anchor.href = downloadUrl;
-        anchor.download = areaInfo.name + ".geojson";
-        anchor.click();
-        window.URL.revokeObjectURL(data);
+        setTimeout(
+          () => {
+            let geojsonResult = this._changeResultToGeoJson(areaInfo);
+            this._realDownLoadFile(geojsonResult, areaInfo.name, "geojson");
+          },
+          index * 1000,
+          index
+        );
+
+        // let data = new Blob([JSON.stringify(geojsonResult)], {
+        //   type: "text/plain;charset=UTF-8",
+        // });
+        // let downloadUrl = window.URL.createObjectURL(data);
+        // let anchor = document.createElement("a");
+        // anchor.href = downloadUrl;
+        // anchor.download = areaInfo.name + ".geojson";
+        // anchor.click();
+        // window.URL.revokeObjectURL(data);
       });
 
-      this.outputBgList.forEach((areaInfo) => {
+      this.outputBgList.forEach((areaInfo, index) => {
         // 背景范围肯定是 geojson 格式 areaInfo.geojson
-        let data = new Blob([JSON.stringify(areaInfo.geojson)], {
-          type: "text/plain;charset=UTF-8",
-        });
-        let downloadUrl = window.URL.createObjectURL(data);
-        let anchor = document.createElement("a");
-        anchor.href = downloadUrl;
-        anchor.download = areaInfo.name + ".geojson";
-        anchor.click();
-        window.URL.revokeObjectURL(data);
+        setTimeout(
+          () => {
+            this._realDownLoadFile(areaInfo.geojson, areaInfo.name, "geojson");
+          },
+          index * 1000,
+          index
+        );
+
+        //
+        // let data = new Blob([JSON.stringify(areaInfo.geojson)], {
+        //   type: "text/plain;charset=UTF-8",
+        // });
+        // let downloadUrl = window.URL.createObjectURL(data);
+        // let anchor = document.createElement("a");
+        // anchor.href = downloadUrl;
+        // anchor.download = areaInfo.name + ".geojson";
+        // anchor.click();
+        // window.URL.revokeObjectURL(data);
       });
+    },
+    _realDownLoadFile(geojsonResult, name, type) {
+      // 处理数据为 geojson
+      let data = new Blob([JSON.stringify(geojsonResult)], {
+        type: "text/plain;charset=UTF-8",
+      });
+      let downloadUrl = window.URL.createObjectURL(data);
+      let anchor = document.createElement("a");
+      anchor.href = downloadUrl;
+      anchor.download = `${name}.${type}`;
+      anchor.click();
+      window.URL.revokeObjectURL(data);
     },
     // 将下载的结果转换成 geojson
     _changeResultToGeoJson(areaInfo) {
@@ -570,7 +599,7 @@ export default {
       });
       geoJsonData.setMap(this.map);
       this.map.setFitView();
-      this.bgPolyLineList.push(geoJsonData)
+      this.bgPolyLineList.push(geoJsonData);
     },
     _drawTextMap(areaName, lng, lat) {
       this.currentBgPolyText = new AMap.Text({
