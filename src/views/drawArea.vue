@@ -61,10 +61,24 @@
           value="完成绘制"
           @click="onEndEditor"
         />
+        <!--        <input-->
+        <!--          type="button"-->
+        <!--          class="button"-->
+        <!--          value="下载文件"-->
+        <!--          @click="onDownloadFile"-->
+        <!--        />-->
+      </div>
+      <div class="flex align-center p-10">
+        <input
+          type="button"
+          class="button mr-20"
+          value="下载导入网格文件"
+          @click="onDownloadBgFile"
+        />
         <input
           type="button"
           class="button"
-          value="下载文件"
+          value="下载新增网格文件"
           @click="onDownloadFile"
         />
       </div>
@@ -372,17 +386,14 @@ export default {
           index * 1000,
           index
         );
-
-        // let data = new Blob([JSON.stringify(geojsonResult)], {
-        //   type: "text/plain;charset=UTF-8",
-        // });
-        // let downloadUrl = window.URL.createObjectURL(data);
-        // let anchor = document.createElement("a");
-        // anchor.href = downloadUrl;
-        // anchor.download = areaInfo.name + ".geojson";
-        // anchor.click();
-        // window.URL.revokeObjectURL(data);
       });
+    },
+    // 监听下载导入文件按钮点击
+    onDownloadBgFile() {
+      if (this.currentPolyEditor || this.currentBgPolyEditor) {
+        this.$message.error("当前有正在编辑的范围未结束，无法下载文件");
+        return;
+      }
 
       this.outputBgList.forEach((areaInfo, index) => {
         // 背景范围肯定是 geojson 格式 areaInfo.geojson
@@ -393,17 +404,6 @@ export default {
           index * 1000,
           index
         );
-
-        //
-        // let data = new Blob([JSON.stringify(areaInfo.geojson)], {
-        //   type: "text/plain;charset=UTF-8",
-        // });
-        // let downloadUrl = window.URL.createObjectURL(data);
-        // let anchor = document.createElement("a");
-        // anchor.href = downloadUrl;
-        // anchor.download = areaInfo.name + ".geojson";
-        // anchor.click();
-        // window.URL.revokeObjectURL(data);
       });
     },
     _realDownLoadFile(geojsonResult, name, type) {
