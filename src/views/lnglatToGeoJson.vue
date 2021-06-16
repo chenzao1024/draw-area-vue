@@ -122,8 +122,14 @@ export default {
         };
         fileList.push(geoJson);
       });
-      fileList.forEach((item) => {
-        this._downLoadFile(item, item.name, "geojson");
+      fileList.forEach((item, index) => {
+        setTimeout(
+          () => {
+            this._downLoadFile(item, item.name, "geojson");
+          },
+          index * 1000,
+          index
+        );
       });
     },
     _getLocationParamByGeoJson(areaGeoJson) {
