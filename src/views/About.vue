@@ -102,14 +102,7 @@ export default {
               this.defaultCha
             } * ${index + 1} - ${this.formInline.wxyj} * ${
               index + 1
-            }) * 3% - ${tempTotalShui}`;
-            console.log(
-              (this.formInline.gz * (index + 1) -
-                this.defaultCha * (index + 1) -
-                this.formInline.wxyj * (index + 1)) *
-                0.03 -
-                tempTotalShui
-            );
+            }) * 3% - ${this._toFixed(tempTotalShui, 2)}`;
             // 税
             shui = this._toFixed(
               this._toFixed(
@@ -134,7 +127,7 @@ export default {
               this.defaultCha
             } * ${index + 1} - ${this.formInline.wxyj} * ${
               index + 1
-            }) * 10% - 2520 - ${tempTotalShui}`;
+            }) * 10% - 2520 - ${this._toFixed(tempTotalShui, 2)}`;
             shui = this._toFixed(
               this._toFixed(
                 (this.formInline.gz * (index + 1) -
@@ -159,7 +152,7 @@ export default {
               this.defaultCha
             } * ${index + 1} - ${this.formInline.wxyj} * ${
               index + 1
-            }) * 20% - 16920 - ${tempTotalShui}`;
+            }) * 20% - 16920 - ${this._toFixed(tempTotalShui, 2)}`;
             shui = this._toFixed(
               this._toFixed(
                 (this.formInline.gz * (index + 1) -
