@@ -29,6 +29,11 @@ const routes = [
     name: "GeoJson转换",
     component: () => import("@/views/lnglatToGeoJson.vue"),
   },
+  {
+    path: "/gz",
+    name: "GZ",
+    component: () => import("@/views/About.vue"),
+  },
 ];
 
 const router = new VueRouter({
